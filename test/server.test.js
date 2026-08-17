@@ -27,6 +27,24 @@ test('GET / serves the homepage', async () => {
   assert.match(body, /<h1>Hello from Node\.js<\/h1>/);
 });
 
+test('homepage includes an accessible theme toggle', async () => {
+  const response = await fetch(`${baseUrl}/`);
+  const body = await response.text();
+
+  assert.match(body, /<button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false">/);
+  assert.match(body, /toggle\.setAttribute\('aria-label', isDark \? 'Switch to light mode' : 'Switch to dark mode'\)/);
+});
+
+test('homepage restores a saved theme and falls back to the system preference', async () => {
+  const response = await fetch(`${baseUrl}/`);
+  const body = await response.text();
+
+  assert.match(body, /localStorage\.getItem\('theme'\)/);
+  assert.match(body, /window\.matchMedia\('\(prefers-color-scheme: dark\)'\)/);
+  assert.match(body, /localStorage\.setItem\('theme', theme\)/);
+  assert.match(body, /document\.documentElement\.dataset\.theme = theme/);
+});
+
 test('unknown paths return 404', async () => {
   const response = await fetch(`${baseUrl}/missing`);
 
